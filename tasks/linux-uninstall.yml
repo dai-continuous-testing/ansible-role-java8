@@ -1,5 +1,12 @@
 
-- name: install java-1.8.0-openjdk
-  package:
+- name: uninstall using yum
+  yum:
     name: java-1.8.0-openjdk-devel
     state: absent
+  when: ansible_pkg_mgr == "yum"
+
+- name: uninstall using apt
+  apt:
+    name: openjdk-8-jdk
+    state: absent
+  when: ansible_pkg_mgr == "apt"

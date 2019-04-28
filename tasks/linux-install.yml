@@ -1,5 +1,12 @@
 
-- name: install java-1.8.0-openjdk
-  package:
+- name: install using yum
+  yum:
     name: java-1.8.0-openjdk-devel
     state: present
+  when: ansible_pkg_mgr == "yum"
+
+- name: install using apt
+  apt:
+    name: openjdk-8-jdk
+    state: present
+  when: ansible_pkg_mgr == "apt"
