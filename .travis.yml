@@ -14,6 +14,9 @@ matrix:
           language: generic
           env: TEST_NAME=01_sanity
 
+install:
+  - ./.travis/install.sh
+
 script:
   - ansible --version
   - cd $TRAVIS_BUILD_DIR/tests/$TEST_NAME && ./start.sh
