@@ -13,6 +13,7 @@ matrix:
           env: TEST_NAME=01_sanity
 
         - os: windows
+          language: shell
           env: TEST_NAME=01_sanity
 
 install:
