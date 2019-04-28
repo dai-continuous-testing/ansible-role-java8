@@ -7,7 +7,7 @@
   post_tasks:
     
     - command: java -version
-      result: java_version
+      register: java_version
 
     - debug:
         var: java_version
