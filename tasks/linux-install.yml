@@ -3,10 +3,12 @@
   yum:
     name: java-1.8.0-openjdk-devel
     state: present
+  become: yes
   when: ansible_pkg_mgr == "yum"
 
 - name: install using apt
   apt:
     name: openjdk-8-jdk
     state: present
+  become: yes
   when: ansible_pkg_mgr == "apt"
