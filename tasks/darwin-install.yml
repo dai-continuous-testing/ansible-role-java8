@@ -11,3 +11,5 @@
 - name: install adoptopenjdk8
   homebrew_cask:
     name: adoptopenjdk/openjdk/adoptopenjdk8
+  become_user: "{{ ansible_user_id }}"
+  become: yes
