@@ -1,0 +1,5 @@
+
+- name: uninstall java from chocolatey 
+  win_chocolatey: 
+    name: jdk8
+    state: absent

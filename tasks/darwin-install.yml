@@ -1,0 +1,13 @@
+
+- name: remove old install java8
+  homebrew_cask:
+    name: java8
+    state: absent
+  register: result
+  failed_when: 
+    - result.failed
+    - not result.msg.endswith('No Cask with this name exists.')
+
+- name: install adoptopenjdk8
+  homebrew_cask:
+    name: adoptopenjdk/openjdk/adoptopenjdk8

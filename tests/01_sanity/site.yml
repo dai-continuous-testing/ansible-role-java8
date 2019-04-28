@@ -1,0 +1,13 @@
+
+- hosts: localhost
+
+  roles:
+    - name: ansible-role-java8
+
+  post_tasks:
+    
+    - command: java -version
+      result: java_version
+
+    - debug:
+        var: java_version
