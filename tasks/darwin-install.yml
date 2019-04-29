@@ -1,15 +1,50 @@
 
-- name: remove old install java8
-  homebrew_cask:
-    name: java8
-    state: absent
-  register: result
-  failed_when: 
-    - result.failed
-    - not result.msg.endswith('No Cask with this name exists.')
+# check if java is correct
 
-- name: install adoptopenjdk8
-  homebrew_cask:
-    name: adoptopenjdk/openjdk/adoptopenjdk8
-  become_user: "{{ ansible_user_id }}"
-  become: yes
+- command: /usr/libexec/java_home -v 1.8
+  ignore_errors: yes
+  register: java_found
+
+- set_fact:
+    java8_installed: "{{ java_found.rc == 0 | bool }}"
+
+# install java
+
+- name: install java8 if not installed
+  block: 
+
+    - name: download zip from s3 url
+      get_url:
+        url: "{{ s3_download_url }}"
+        dest: "{{ temp_folder }}/{{ installer_file_name }}"
+        
+    - set_fact:
+        mount_point: "{{ temp_folder }}/tmp-java8-{{ installation_timestamp }}"
+        mount_point_regexp: "tmp-java8-*"
+
+    - name: make sure mountpoint folder exists
+      file: 
+        path: "{{ mount_point }}"
+        state: directory
+
+    - command: "hdiutil attach {{ temp_folder }}/{{ installer_file_name }} -nobrowse -mountpoint {{ mount_point }}"
+
+    - name: find volume name
+      find:
+        paths: "{{ mount_point }}"
+        patterns: "*.pkg"
+      register: files_matched
+
+    - set_fact:
+        app_file_path: "{{ files_matched.files[0].path }}"
+        app_file_name: "{{ files_matched.files[0].path | basename }}"
+
+    - command: "/usr/sbin/installer -pkg '{{ app_file_path }}' -target /"
+      become: yes
+
+    - command: "diskutil umount {{ mount_point }}"
+
+    - name: Ansible delete file wildcard example
+      shell: "rm -rf {{ temp_folder }}/{{ mount_point_regexp }}"
+
+  when: not java8_installed

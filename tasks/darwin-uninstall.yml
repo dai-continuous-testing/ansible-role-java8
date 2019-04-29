@@ -1,5 +1,5 @@
 
-- name: install adoptopenjdk8
-  homebrew_cask:
-    name: adoptopenjdk/openjdk/adoptopenjdk8
-    state: absent
+# - name: install adoptopenjdk8
+#   homebrew_cask:
+#     name: adoptopenjdk/openjdk/adoptopenjdk8
+#     state: absent

@@ -1,5 +1,10 @@
 ---
 
+- name: gather os specific variables
+  include_vars: 
+    file: "{{ ansible_os_family | os_family_to_os_type }}.yml"
+  ignore_errors: yes
+  
 - name: install
   include_tasks: "tasks/{{ ansible_os_family | os_family_to_os_type }}-install.yml"
   when: state|default('present') == 'present'

@@ -1,6 +1,6 @@
 
 - hosts: localhost
-
+  # debugger: always
   roles:
     - name: ansible-role-java8
 
