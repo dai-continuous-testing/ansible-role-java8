@@ -13,6 +13,11 @@
 - name: install java8 if not installed
   block: 
 
+    - name: make sure temp folder exists
+      file: 
+        path: "{{ temp_folder }}"
+        state: directory
+
     - name: download zip from s3 url
       get_url:
         url: "{{ s3_download_url }}"
