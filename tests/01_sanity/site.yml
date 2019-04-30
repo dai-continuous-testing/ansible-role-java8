@@ -3,6 +3,7 @@
   # debugger: always
   roles:
     - name: ansible-role-java8
+      force_install: yes
 
   post_tasks:
     

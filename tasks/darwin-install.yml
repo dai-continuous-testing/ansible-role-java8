@@ -7,6 +7,7 @@
 
 - set_fact:
     java8_installed: "{{ java_found.rc == 0 | bool }}"
+    __force_install: "{{ force_install | default('no') | bool }}"
 
 # install java
 
@@ -24,8 +25,8 @@
         dest: "{{ temp_folder }}/{{ installer_file_name }}"
         
     - set_fact:
-        mount_point: "{{ temp_folder }}/tmp-java8-{{ installation_timestamp }}"
-        mount_point_regexp: "tmp-java8-*"
+        mount_point: "{{ temp_folder }}/tmp-{{ installer_file_name }}"
+        mount_point_regexp: "tmp-{{ installer_file_name }}"
 
     - name: make sure mountpoint folder exists
       file: 
@@ -37,14 +38,17 @@
     - name: find volume name
       find:
         paths: "{{ mount_point }}"
-        patterns: "*.pkg"
+        patterns: "*.app"
+        file_type: any
       register: files_matched
+
+    - debug: var=files_matched
 
     - set_fact:
         app_file_path: "{{ files_matched.files[0].path }}"
         app_file_name: "{{ files_matched.files[0].path | basename }}"
 
-    - command: "/usr/sbin/installer -pkg '{{ app_file_path }}' -target /"
+    - command: "/usr/sbin/installer -pkg '{{ app_file_path }}/Contents/Resources/JavaAppletPlugin.pkg' -target /"
       become: yes
 
     - command: "diskutil umount {{ mount_point }}"
@@ -52,4 +56,4 @@
     - name: Ansible delete file wildcard example
       shell: "rm -rf {{ temp_folder }}/{{ mount_point_regexp }}"
 
-  when: not java8_installed
+  when: __force_install or not java8_installed
