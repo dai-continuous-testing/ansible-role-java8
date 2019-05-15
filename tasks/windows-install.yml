@@ -12,5 +12,5 @@
 - name: install java from chocolatey 
   win_chocolatey: 
     name: jdk8
-    version: 8.0.201
     state: present
+  become: yes
