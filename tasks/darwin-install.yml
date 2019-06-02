@@ -53,7 +53,7 @@
 
     - command: "diskutil umount {{ mount_point }}"
 
-    - name: Ansible delete file wildcard example
+    - name: delete all temp mounted
       shell: "rm -rf {{ temp_folder }}/{{ mount_point_regexp }}"
 
   when: __force_install or not java8_installed
