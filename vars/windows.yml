@@ -1,0 +1,15 @@
+---
+
+installation_root_folder: "C:\\Experitest"
+
+temp_folder: "c:\\temp\\experitest"
+
+java_download_filename: "jre{{ java_version }}-windows-x64.zip"
+
+java_relative_path: "java/windows"
+
+java_installation_folder: "{{ installation_root_folder }}\\jre"
+
+java_home: "{{ java_installation_folder }}\\jre{{ java_version }}"
+
+java_bin: "{{ java_home }}\\bin"

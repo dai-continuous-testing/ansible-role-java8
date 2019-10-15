@@ -1,14 +1,101 @@
+# validation
 
-- name: install using yum
-  yum:
-    name: java-1.8.0-openjdk-devel
-    state: present
-  become: yes
-  when: ansible_pkg_mgr == "yum"
+- name: assert all vars are set
+  assert: { that: "{{ item }} != '' " }
+  with_items:
+  - java_version
+  - java_home
+  - temp_folder
+  - java_download_filename
+  - java_download_url
+  - java_installation_folder
+  - java_bin
 
-- name: install using apt
-  apt:
-    name: openjdk-8-jdk
+
+# validate if installed
+
+- name: Check if java exists
+  stat:
+    path: "{{ java_bin }}/java"
+  register: java_exists
+
+# install java
+
+- name: install java
+  block:
+
+    - name: download java from s3 url
+      get_url:
+        url: "{{ java_download_url }}"
+        dest: "{{ temp_folder }}/{{ java_download_filename }}"
+        timeout: "{{ download_timeout | default(60) }}"
+    
+    - name: make sure java installation folder exists
+      file:
+        path: "{{ java_installation_folder }}"
+        state: directory
+        owner: "{{ ansible_user_id }}"
+      become: yes
+    
+    - name: unzip java file
+      command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
+      args:
+        creates: "{{ java_bin }}/java"
+      become: yes
+
+
+  when: not java_exists.stat.exists
+
+
+# set java to global environment path
+
+- name: make sure ~/.bash_profile exists
+  stat:
+    path: ~/.bash_profile
+  register: bash_profile
+
+- name: create if ~/.bash_profile not exists
+  file:
+    path: ~/.bash_profile
+    state: touch
+  when: not bash_profile.stat.exists
+
+- name: Set JAVA_HOME
+  lineinfile:
+    dest: ~/.bash_profile
     state: present
-  become: yes
-  when: ansible_pkg_mgr == "apt"
+    regexp: '^export JAVA_HOME='
+    line: "'export JAVA_HOME={{ java_home }}'"
+
+- name: Set JAVA PATH
+  lineinfile:
+    dest: ~/.bash_profile
+    state: present
+    regexp: '^export PATH='
+    line: "'export PATH={{ java_bin }}:$PATH'"
+
+
+# validate java
+
+- name: make sure java is installed on the machine
+  command: "java -version"
+  register: java_test
+  ignore_errors: yes
+
+- name: fail if java is not found
+  fail:
+    msg: java must be accesible in path
+  when: java_test.rc != 0
+
+
+# expose role output 
+
+- name: sanitize role name
+  set_fact:
+    sanitize_role_name: "{{ role_name | replace('-', '_') | regex_replace('([^A-Za-z0-9_])', '') | trim }}"
+
+- name: expose role output
+  set_fact:
+    "{{ sanitize_role_name }}":
+      java_home: "{{ java_home }}"
+      java_bin: "{{ java_bin }}"

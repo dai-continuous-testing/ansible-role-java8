@@ -1,5 +1,36 @@
+# validation
 
-# - name: install adoptopenjdk8
-#   homebrew_cask:
-#     name: adoptopenjdk/openjdk/adoptopenjdk8
-#     state: absent
+- name: assert all vars are set
+  assert: { that: "{{ item }} != '' " }
+  with_items:
+  - java_home
+  - java_bin
+
+
+# validate if installed
+
+- name: Check if java exists
+  stat:
+    path: "{{ java_bin }}/java"
+  register: java_exists
+
+# uninstall java
+
+- name: uninstall java
+  block:
+
+    - name: kill java
+      shell: "/bin/kill -9 $(ps -ef | grep java | grep -v grep | awk '{print $2}' | xargs)"
+      become: yes
+      changed_when: no
+      failed_when: no
+      ignore_errors: yes
+    
+    - name: remove java home
+      file:
+        path: "{{ java_home }}"
+        state: absent
+      become: yes
+
+  when: not java_exists.stat.exists
+

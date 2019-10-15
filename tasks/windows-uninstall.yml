@@ -1,5 +1,53 @@
+# validation
 
-- name: uninstall java from chocolatey 
-  win_chocolatey: 
-    name: jdk8
+- name: assert all vars are set
+  assert: { that: "{{ item }} != '' " }
+  with_items:
+  - java_home
+  - java_bin
+
+
+# validate if installed
+
+- name: Check if java exists
+  win_stat:
+    path: "{{ java_bin }}\\java.exe"
+  register: java_exists
+
+# uninstall java
+
+- name: uninstall java
+  block:
+
+    - name: kill java
+      win_shell: |
+        taskkill /F /IM java.exe
+      register: killjava
+      changed_when: killjava.rc == 0 and 'The process "java.exe" not found.' not in killjava.stderr
+      failed_when: killjava.rc != 0 and 'The process "java.exe" not found.' not in killjava.stderr
+      become: yes
+    
+    - name: remove java home
+      win_file:
+        path: "{{ java_home }}"
+        state: absent
+      become: yes
+
+  when: java_exists.stat.exists
+
+- name: remove JAVA_HOME
+  win_environment:
     state: absent
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    level: machine
+  loop:
+    - { name: "JAVA_HOME", value: "{{ java_home }}" }
+  become: yes
+
+- name: remove JAVA PATH
+  win_path:
+    state: absent
+    elements: "{{ java_bin }}"
+    scope: machine
+  become: yes

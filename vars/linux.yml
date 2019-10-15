@@ -1,0 +1,18 @@
+---
+
+installation_root_folder: "/opt/Experitest"
+
+# https://superuser.com/questions/332610/where-is-the-temporary-directory-in-linux
+# /tmp      - temp folder
+# /var/tmp  - temp folder that is preservered after reboot
+temp_folder: /var/tmp/Experitest
+
+java_download_filename: "jre{{ java_version }}-linux-x64.tar.gz"
+
+java_relative_path: "java/linux"
+
+java_installation_folder: "{{ installation_root_folder }}/jre"
+
+java_home: "{{ java_installation_folder }}/jre{{ java_version }}"
+
+java_bin: "{{ java_home }}/bin/java"
