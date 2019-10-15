@@ -39,10 +39,9 @@
   win_environment:
     state: absent
     name: "{{ item.name }}"
-    value: "{{ item.value }}"
     level: machine
   loop:
-    - { name: "JAVA_HOME", value: "{{ java_home }}" }
+    - { name: "JAVA_HOME" }
   become: yes
 
 - name: remove JAVA PATH

@@ -79,6 +79,12 @@
     msg: java must be accesible in path
   when: java_test.rc != 0
 
+- name: validate if the version mismatch in system environment variables path
+  fail:
+    msg: "WARNING: installed java version {{ java_version }} and the system environment path {{ java_test.stderr_lines[0] }} is mismatch. Remove the other {{ java_test.stderr_lines[0] }} from system environment variables path."
+  when: "java_version not in java_test.stderr"
+  ignore_errors: yes
+
 
 # expose role output 
 
