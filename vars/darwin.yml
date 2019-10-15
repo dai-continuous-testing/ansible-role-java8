@@ -1,11 +1,15 @@
+---
 
+installation_root_folder: "/Applications/Experitest"
 
-cdn_name: "devops-artifacts.experitest.com"
+temp_folder: "/tmp/experitest"
 
-relative_path: java/osx
-installer_file_name: jre-8u212-macosx-x64.dmg
+java_download_filename: "jre{{ java_version }}-macosx-x64.tar.gz"
 
-s3_download_url: "https://{{ cdn_name }}/{{ relative_path }}/{{ installer_file_name }}"
+java_relative_path: "java/osx"
 
-installation_timestamp: "{{ ansible_date_time.epoch }}"
-temp_folder: "/tmp/experitest/java"
+java_installation_folder: "{{ installation_root_folder }}/jre"
+
+java_home: "{{ java_installation_folder }}/jre{{ java_version }}.jre"
+
+java_bin: "{{ java_home }}/Contents/Home/bin"
