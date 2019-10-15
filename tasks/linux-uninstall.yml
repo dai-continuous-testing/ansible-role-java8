@@ -32,5 +32,5 @@
         state: absent
       become: yes
 
-  when: not java_exists.stat.exists
+  when: java_exists.stat.exists
 
