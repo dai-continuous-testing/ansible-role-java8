@@ -36,6 +36,7 @@
         url: "{{ java_download_url }}"
         dest: "{{ temp_folder }}/{{ java_download_filename }}"
         timeout: "{{ download_timeout | default(60) }}"
+      become: yes
     
     - name: make sure java installation folder exists
       file:
@@ -78,8 +79,15 @@
     dest: ~/.bashrc
     state: present
     regexp: "^export PATH="
-    line: "export PATH={{ java_bin }}:$PATH"
+    line: "export PATH={{ java_bin }}:/usr/local/bin:$PATH"
 
+- name: add bashrc to bash_profile
+  lineinfile:
+    dest: ~/.bash_profile
+    state: present
+    regexp: "if [ -f ~/.bashrc ]"
+    line: "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi"
+    insertbefore: BOF
 
 # validate java
 
