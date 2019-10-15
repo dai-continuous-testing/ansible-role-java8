@@ -24,6 +24,13 @@
 - name: install java
   block:
 
+    - name: make sure temp folder
+      file:
+        path: "{{ temp_folder }}"
+        state: directory
+        owner: "{{ ansible_user_id }}"
+      become: yes
+    
     - name: download java from s3 url
       get_url:
         url: "{{ java_download_url }}"
