@@ -56,31 +56,30 @@
 
 # set java to global environment path
 
-- name: make sure ~/.bash_profile exists
+- name: make sure ~/.bashrc exists
   stat:
-    path: ~/.bash_profile
-  register: bash_profile
+    path: ~/.bashrc
+  register: bashrc_exists
 
-- name: create if ~/.bash_profile not exists
+- name: create if ~/.bashrc not exists
   file:
-    path: ~/.bash_profile
+    path: ~/.bashrc
     state: touch
-  when: not bash_profile.stat.exists
+  when: not bashrc_exists.stat.exists
 
 - name: Set JAVA_HOME
   lineinfile:
-    dest: ~/.bash_profile
+    dest: ~/.bashrc
     state: present
-    regexp: '^export JAVA_HOME='
-    line: "'export JAVA_HOME={{ java_home }}'"
+    regexp: "^export JAVA_HOME="
+    line: "export JAVA_HOME={{ java_home }}"
 
 - name: Set JAVA PATH
   lineinfile:
-    dest: ~/.bash_profile
+    dest: ~/.bashrc
     state: present
-    regexp: '^export PATH='
-    line: "'export PATH={{ java_bin }}:$PATH'"
-
+    regexp: "^export PATH="
+    line: "export PATH={{ java_bin }}:$PATH"
 
 # validate java
 
