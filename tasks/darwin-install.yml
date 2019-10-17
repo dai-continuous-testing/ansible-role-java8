@@ -50,6 +50,20 @@
       args:
         creates: "{{ java_bin }}/java"
       become: yes
+      register: unzip_java
+      ignore_errors: yes
+    
+    - name: sleep for 25 seconds if unzip java fails
+      pause:
+        seconds: 25
+      when: unzip_java.rc != 0
+
+    - name: rerun - unzip java file if first fails
+      command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
+      args:
+        creates: "{{ java_bin }}/java"
+      become: yes
+      when: unzip_java.rc != 0
 
   when: not java_exists.stat.exists
 
