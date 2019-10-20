@@ -68,25 +68,33 @@
 
   when: not java_exists.stat.exists
 
-- name: Set JAVA_HOME
-  win_environment:
-    state: present
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-    level: machine
-  loop:
-    - { name: "JAVA_HOME", value: "{{ java_home }}" }
-  become: yes
 
-- name: Set JAVA PATH
-  win_path:
-    state: present
-    elements: "{{ java_bin }}"
-    scope: machine
-  become: yes
+# set java to global environment path (if needed)
+
+- name: 
+  block:
+
+    - name: Set JAVA_HOME
+      win_environment:
+        state: present
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        level: machine
+      loop:
+        - { name: "JAVA_HOME", value: "{{ java_home }}" }
+      become: yes
+    
+    - name: Set JAVA PATH
+      win_path:
+        state: present
+        elements: "{{ java_bin }}"
+        scope: machine
+      become: yes
+
+  when: add_java_path == True
 
 - name: make sure java is installed on the machine
-  win_command: "java -version"
+  win_command: "{{ java_bin }}\\java.exe -version"
   register: java_test
   ignore_errors: yes
 
@@ -94,13 +102,6 @@
   fail:
     msg: java must be accesible in path
   when: java_test.rc != 0
-
-- name: validate if the version mismatch in system environment variables path
-  fail:
-    msg: "WARNING: installed java version {{ java_version }} and the system environment path {{ java_test.stderr_lines[0] }} is mismatch. Remove the other {{ java_test.stderr_lines[0] }} from system environment variables path."
-  when: "java_version not in java_test.stderr"
-  ignore_errors: yes
-
 
 # expose role output 
 

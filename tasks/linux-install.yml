@@ -68,37 +68,42 @@
   when: not java_exists.stat.exists
 
 
-# set java to global environment path
+# set java to global environment path - if needed
 
-- name: make sure ~/.bashrc exists
-  stat:
-    path: ~/.bashrc
-  register: bashrc_exists
+- name: 
+  block:
 
-- name: create if ~/.bashrc not exists
-  file:
-    path: ~/.bashrc
-    state: touch
-  when: not bashrc_exists.stat.exists
+    - name: make sure ~/.bashrc exists
+      stat:
+        path: ~/.bashrc
+      register: bashrc_exists
+    
+    - name: create if ~/.bashrc not exists
+      file:
+        path: ~/.bashrc
+        state: touch
+      when: not bashrc_exists.stat.exists
+    
+    - name: Set JAVA_HOME
+      lineinfile:
+        dest: ~/.bashrc
+        state: present
+        regexp: "^export JAVA_HOME="
+        line: "export JAVA_HOME={{ java_home }}"
+    
+    - name: Set JAVA PATH
+      lineinfile:
+        dest: ~/.bashrc
+        state: present
+        regexp: "^export PATH="
+        line: "export PATH={{ java_bin }}:$PATH"
 
-- name: Set JAVA_HOME
-  lineinfile:
-    dest: ~/.bashrc
-    state: present
-    regexp: "^export JAVA_HOME="
-    line: "export JAVA_HOME={{ java_home }}"
-
-- name: Set JAVA PATH
-  lineinfile:
-    dest: ~/.bashrc
-    state: present
-    regexp: "^export PATH="
-    line: "export PATH={{ java_bin }}:$PATH"
+  when: add_java_path == True
 
 # validate java
 
 - name: make sure java is installed on the machine
-  command: "java -version"
+  command: "{{ java_bin }}/java -version"
   register: java_test
   ignore_errors: yes
 
@@ -106,13 +111,6 @@
   fail:
     msg: java must be accesible in path
   when: java_test.rc != 0
-
-- name: validate if the version mismatch in system environment variables path
-  fail:
-    msg: "WARNING: installed java version {{ java_version }} and the system environment path {{ java_test.stderr_lines[0] }} is mismatch. Remove the other {{ java_test.stderr_lines[0] }} from system environment variables path."
-  when: "java_version not in java_test.stderr"
-  ignore_errors: yes
-
 
 # expose role output 
 
