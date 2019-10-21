@@ -16,7 +16,7 @@
 
 - name: Check if java exists
   win_stat:
-    path: "{{ java_bin }}\\java.exe"
+    path: "{{ java_bin }}"
   register: java_exists
 
 # install java
@@ -47,7 +47,7 @@
         src: "{{ temp_folder }}\\{{ java_download_filename }}"
         dest: "{{ java_installation_folder }}"
         remote_src: yes
-        creates: "{{ java_bin }}\\java.exe"
+        creates: "{{ java_bin }}"
       become: yes
       register: unzip_java
       ignore_errors: yes
@@ -62,7 +62,7 @@
         src: "{{ temp_folder }}\\{{ java_download_filename }}"
         dest: "{{ java_installation_folder }}"
         remote_src: yes
-        creates: "{{ java_bin }}\\java.exe"
+        creates: "{{ java_bin }}"
       become: yes
       when: unzip_java.rc != 0
 
@@ -87,14 +87,14 @@
     - name: Set JAVA PATH
       win_path:
         state: present
-        elements: "{{ java_bin }}"
+        elements: "{{ java_home }}\\bin"
         scope: machine
       become: yes
 
-  when: add_java_path == True
+  when: update_java_path == True
 
 - name: make sure java is installed on the machine
-  win_command: "{{ java_bin }}\\java.exe -version"
+  win_command: "{{ java_bin }} -version"
   register: java_test
   ignore_errors: yes
 

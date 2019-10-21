@@ -11,7 +11,7 @@
 
 - name: Check if java exists
   win_stat:
-    path: "{{ java_bin }}\\java.exe"
+    path: "{{ java_bin }}"
   register: java_exists
 
 # uninstall java
@@ -34,19 +34,3 @@
       become: yes
 
   when: java_exists.stat.exists
-
-- name: remove JAVA_HOME
-  win_environment:
-    state: absent
-    name: "{{ item.name }}"
-    level: machine
-  loop:
-    - { name: "JAVA_HOME" }
-  become: yes
-
-- name: remove JAVA PATH
-  win_path:
-    state: absent
-    elements: "{{ java_bin }}"
-    scope: machine
-  become: yes

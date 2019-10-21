@@ -16,7 +16,7 @@
 
 - name: Check if java exists
   stat:
-    path: "{{ java_bin }}/java"
+    path: "{{ java_bin }}"
   register: java_exists
 
 # install java
@@ -48,7 +48,7 @@
     - name: unzip java file
       command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
       args:
-        creates: "{{ java_bin }}/java"
+        creates: "{{ java_bin }}"
       become: yes
       register: unzip_java
       ignore_errors: yes
@@ -61,7 +61,7 @@
     - name: rerun - unzip java file if first fails
       command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
       args:
-        creates: "{{ java_bin }}/java"
+        creates: "{{ java_bin }}"
       become: yes
       when: unzip_java.rc != 0
 
@@ -96,7 +96,7 @@
         dest: ~/.bashrc
         state: present
         regexp: "^export PATH="
-        line: "export PATH={{ java_bin }}:/usr/local/bin:$PATH"
+        line: "export PATH={{ java_home }}/Contents/Home/bin:/usr/local/bin:$PATH"
     
     - name: add bashrc to bash_profile
       lineinfile:
@@ -106,12 +106,12 @@
         line: "if [ -f ~/.bashrc ]; then . ~/.bashrc; fi"
         insertbefore: BOF
 
-  when: add_java_path == True
+  when: update_java_path == True
 
 # validate java
 
 - name: make sure java is installed on the machine
-  command: "{{ java_bin }}/java -version"
+  command: "{{ java_bin }} -version"
   register: java_test
   ignore_errors: yes
 
