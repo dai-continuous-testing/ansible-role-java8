@@ -11,7 +11,7 @@
 
 - name: Check if java exists
   stat:
-    path: "{{ java_bin }}/java"
+    path: "{{ java_bin }}"
   register: java_exists
 
 # uninstall java
