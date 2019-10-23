@@ -55,7 +55,7 @@
     - name: sleep for 25 seconds if unzip java fails
       pause:
         seconds: 25
-      when: unzip_java.rc != 0
+      when: unzip_java.failed
 
     - name: rerun - unzip java file if first fails
       win_unzip:
@@ -64,7 +64,7 @@
         remote_src: yes
         creates: "{{ java_bin }}"
       become: yes
-      when: unzip_java.rc != 0
+      when: unzip_java.failed
 
   when: not java_exists.stat.exists
 
