@@ -1,6 +1,6 @@
 ---
 
-installation_root_folder: "/Applications/Experitest"
+__installation_root_folder: "/Applications/Experitest"
 
 temp_folder: "/tmp/experitest"
 
