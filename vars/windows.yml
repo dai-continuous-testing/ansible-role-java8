@@ -1,6 +1,6 @@
 ---
 
-installation_root_folder: "C:\\Experitest"
+__installation_root_folder: "C:\\Experitest"
 
 temp_folder: "c:\\temp\\experitest"
 
