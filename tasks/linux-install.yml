@@ -36,7 +36,20 @@
         url: "{{ java_download_url }}"
         dest: "{{ temp_folder }}/{{ java_download_filename }}"
         timeout: "{{ download_timeout | default(60) }}"
-    
+      when: deployment_mode == "online"
+   
+    - name: download java from shared storage folder
+      copy:
+        src: "{{ shared_storage_folder }}/{{ java_relative_path }}/{{ java_download_filename }}"
+        dest: "{{ temp_folder }}/{{ java_download_filename }}"
+        remote_src: no
+      when: deployment_mode == "offline"
+
+    - name: fail if java download file not found
+      fail:
+        msg: java installer not found on the path
+      when: deployment_mode != "offline" and deployment_mode != "online"
+
     - name: make sure java installation folder exists
       file:
         path: "{{ java_installation_folder }}"
