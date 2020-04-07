@@ -3,6 +3,7 @@
 required_modifiable_fields:
   - installation_root_folder
   - java_version
+  - deployment_mode
 
 __java_version: 1.8.0_221
 
