@@ -1,6 +1,7 @@
 ---
 
 __installation_root_folder: "C:\\Experitest"
+__shared_storage_folder: ""
 
 temp_folder: "c:\\temp\\experitest"
 
