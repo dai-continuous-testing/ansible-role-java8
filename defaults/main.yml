@@ -5,6 +5,7 @@ required_modifiable_fields:
   - java_version
 
 __java_version: 1.8.0_281
+__java_internal_dir: jdk8u292-b10-jre
 
 cdn_name: "devops-artifacts.experitest.com"
 java_download_url: "https://{{ cdn_name }}/{{ java_relative_path }}/{{ java_download_filename }}"
