@@ -16,3 +16,6 @@ java_installation_folder: "{{ installation_root_folder }}/jre"
 java_home: "{{ java_installation_folder }}/jdk{{ java_version }}-jre"
 
 java_bin: "{{ java_home }}/bin/java"
+
+__custom_download_username: "myuser"
+__custom_download_password: "mypassword"
