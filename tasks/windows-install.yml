@@ -35,6 +35,7 @@
         dest: "{{ temp_folder }}\\{{ java_download_filename }}"
         timeout: "{{ download_timeout | default(60) }}"
         force: no
+      when: custom_download_url == ""
 
     - name: download zip from custom url
       win_get_url:
