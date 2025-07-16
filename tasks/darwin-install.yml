@@ -15,13 +15,6 @@
   - java_installation_folder
   - java_bin
 
-- name: validate supported architecture
-  assert:
-    that:
-      - ansible_architecture | ansible_arch_to_java_arch in ['x64', 'aarch64']
-    fail_msg: "Unsupported architecture: {{ ansible_architecture }}. Supported architectures are x86_64 (Intel) and arm64 (Apple Silicon)"
-    quiet: true
-
 
 # validate if installed
 
@@ -29,56 +22,6 @@
   stat:
     path: "{{ java_bin }}"
   register: java_exists
-
-- name: Check installed Java architecture
-  shell: "{{ java_bin }} -XshowSettings:properties -version 2>&1 | grep 'os.arch'"
-  register: installed_java_arch
-  ignore_errors: yes
-  when: java_exists.stat.exists
-
-- name: Determine expected Java architecture
-  set_fact:
-    expected_java_arch: "{{ ansible_arch_to_java_arch }}"
-
-- name: Check if Java architecture matches system architecture
-  set_fact:
-    java_arch_mismatch: >-
-      {{
-        java_exists.stat.exists and
-        installed_java_arch.rc == 0 and
-        not (
-          (expected_java_arch == 'x64' and 'x86_64' in installed_java_arch.stdout) or
-          (expected_java_arch == 'aarch64' and 'aarch64' in installed_java_arch.stdout)
-        )
-      }}
-
-- name: Remove existing Java if architecture mismatch detected
-  file:
-    path: "{{ java_home }}"
-    state: absent
-  become: yes
-  when: java_arch_mismatch | default(false)
-
-- name: Force reinstall flag when architecture mismatch
-  set_fact:
-    force_java_install: "{{ not java_exists.stat.exists or java_arch_mismatch | default(false) }}"
-
-- name: Display architecture mismatch warning
-  debug:
-    msg: |
-      Java architecture mismatch detected!
-      System architecture: {{ ansible_architecture }} ({{ expected_java_arch }})
-      Installed Java architecture: {{ installed_java_arch.stdout | default('unknown') }}
-      Reinstalling Java with correct architecture...
-  when: java_arch_mismatch | default(false)
-
-- name: Display installation reason
-  debug:
-    msg: "Installing Java because: {{ 'Java not found' if not java_exists.stat.exists else 'Architecture mismatch - need ' + expected_java_arch }}"
-  when: force_java_install | default(false)
-
-
-
 
 # install java
 
@@ -117,7 +60,7 @@
     - name: unzip java file
       command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
       args:
-        creates: "{{ java_bin if not (java_arch_mismatch | default(false)) else omit }}"
+        creates: "{{ java_bin }}"
       become: yes
       register: unzip_java
       ignore_errors: yes
@@ -130,11 +73,11 @@
     - name: rerun - unzip java file if first fails
       command: "tar -xzvf {{ temp_folder }}/{{ java_download_filename }} -C {{ java_installation_folder }}"
       args:
-        creates: "{{ java_bin if not (java_arch_mismatch | default(false)) else omit }}"
+        creates: "{{ java_bin }}"
       become: yes
       when: unzip_java.rc != 0
 
-  when: force_java_install | default(false)
+  when: not java_exists.stat.exists
 
 
 # set java to global environment path
@@ -188,30 +131,6 @@
   fail:
     msg: java must be accesible in path
   when: java_test.rc != 0
-
-- name: check java architecture matches system architecture
-  shell: "{{ java_bin }} -XshowSettings:properties -version 2>&1 | grep 'os.arch'"
-  register: java_arch_check
-  ignore_errors: yes
-
-- name: validate java architecture
-  assert:
-    that:
-      - >
-        (ansible_architecture | ansible_arch_to_java_arch == 'x64' and 'x86_64' in java_arch_check.stdout) or
-        (ansible_architecture | ansible_arch_to_java_arch == 'aarch64' and 'aarch64' in java_arch_check.stdout)
-    fail_msg: "Java architecture mismatch. Expected: {{ ansible_architecture | ansible_arch_to_java_arch }}, but Java reports: {{ java_arch_check.stdout }}"
-    quiet: true
-  when: java_arch_check.rc == 0
-
-- name: confirm successful installation with correct architecture
-  debug:
-    msg: |
-      Java installation successful!
-      System architecture: {{ ansible_architecture }} ({{ ansible_architecture | ansible_arch_to_java_arch }})
-      Java architecture: {{ java_arch_check.stdout | default('could not determine') }}
-      Java version: {{ java_test.stdout_lines[0] | default('unknown') }}
-  when: java_test.rc == 0 and java_arch_check.rc == 0
 
 # expose role output 
 
