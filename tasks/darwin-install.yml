@@ -23,7 +23,45 @@
     path: "{{ java_bin }}"
   register: java_exists
 
+- name: Get machine architecture
+  command: uname -m
+  register: machine_arch
+  changed_when: false
+
+- name: Check installed Java architecture
+  shell: "{{ java_bin }} -XshowSettings:properties -version 2>&1 | grep 'os.arch' | awk '{print $3}'"
+  register: java_arch_result
+  when: java_exists.stat.exists
+  ignore_errors: yes
+  changed_when: false
+
+- name: Map machine architecture to Java architecture format
+  set_fact:
+    expected_java_arch: "{{ 'aarch64' if machine_arch.stdout == 'arm64' else (machine_arch.stdout if machine_arch.stdout in ['x86_64', 'aarch64'] else 'x86_64') }}"
+
+- name: Check if Java architecture matches machine architecture
+  set_fact:
+    java_arch_mismatch: "{{ java_exists.stat.exists and java_arch_result.stdout is defined and java_arch_result.stdout != expected_java_arch }}"
+
+- name: Mark Java for replacement due to architecture mismatch
+  set_fact:
+    java_needs_replacement: "{{ java_arch_mismatch | default(false) }}"
+  when: java_arch_mismatch is defined
+
+- name: Display architecture mismatch warning
+  debug:
+    msg: "Java architecture mismatch detected. Machine: {{ machine_arch.stdout }}, Java: {{ java_arch_result.stdout | default('unknown') }}. Marking for replacement."
+  when: java_needs_replacement | default(false)
+
+
 # install java
+
+- name: Remove existing Java installation due to architecture mismatch
+  file:
+    path: "{{ java_installation_folder }}"
+    state: absent
+  become: yes
+  when: java_needs_replacement | default(false)
 
 - name: install java
   block:
@@ -77,7 +115,7 @@
       become: yes
       when: unzip_java.rc != 0
 
-  when: not java_exists.stat.exists
+  when: not java_exists.stat.exists or java_needs_replacement | default(false)
 
 
 # set java to global environment path
