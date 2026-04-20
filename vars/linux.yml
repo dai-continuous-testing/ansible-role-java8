@@ -7,7 +7,7 @@ __installation_root_folder: "/opt/Experitest"
 # /var/tmp  - temp folder that is preservered after reboot
 temp_folder: /var/tmp/Experitest
 
-java_download_filename: "OpenJDK8U-jre_x64_linux_hotspot_{{ java_version }}.tar.gz"
+java_download_filename: "OpenJDK{{ java_major_version }}U-jre_x64_linux_hotspot_{{ java_version }}.tar.gz"
 
 java_relative_path: "java/linux"
 

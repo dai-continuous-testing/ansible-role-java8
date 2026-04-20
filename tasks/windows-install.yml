@@ -82,6 +82,16 @@
       become: yes
       when: unzip_java.failed
 
+    - name: rename extracted java folder to consistent name
+      win_shell: |
+        $extracted = Get-ChildItem "{{ java_installation_folder }}" -Directory | Where-Object { $_.Name -like "jdk*" } | Select-Object -First 1
+        $dst = "{{ java_home }}"
+        if ($extracted -and !(Test-Path $dst)) {
+          Rename-Item -Path $extracted.FullName -NewName (Split-Path $dst -Leaf)
+        }
+      creates: "{{ java_home }}"
+      become: yes
+
   when: not java_exists.stat.exists
 
 

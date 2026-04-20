@@ -76,6 +76,15 @@
       become: yes
       when: unzip_java.rc != 0
 
+    - name: rename extracted java folder to consistent name
+      shell: |
+        extracted=$(find {{ java_installation_folder }} -maxdepth 1 -type d -name "jdk*" | head -1)
+        if [ -n "$extracted" ] && [ "$extracted" != "{{ java_home }}" ]; then
+          mv "$extracted" "{{ java_home }}"
+        fi
+      args:
+        creates: "{{ java_home }}"
+      become: yes
 
   when: not java_exists.stat.exists
 

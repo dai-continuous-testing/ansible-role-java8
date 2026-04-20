@@ -4,7 +4,7 @@ __installation_root_folder: "C:\\Experitest"
 
 temp_folder: "c:\\temp\\experitest"
 
-java_download_filename: "OpenJDK8U-jre_x64_windows_hotspot_{{ java_version }}.zip"
+java_download_filename: "OpenJDK{{ java_major_version }}U-jre_x64_windows_hotspot_{{ java_version }}.zip"
 
 java_relative_path: "java/windows"
 
