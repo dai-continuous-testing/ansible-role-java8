@@ -82,24 +82,28 @@
       become: yes
       when: unzip_java.failed
 
-    - name: find extracted java folder
-      win_find:
-        paths: "{{ java_installation_folder }}"
-        file_type: directory
-        patterns: "jdk*"
-        recurse: no
-      register: extracted_java_dirs
+    - name: set extracted java folder path
+      set_fact:
+        extracted_java_path: "{{ java_installation_folder }}\\jdk-{{ java_version | replace('_', '+') }}-jre"
+
+    - name: check extracted java folder exists
+      win_stat:
+        path: "{{ extracted_java_path }}"
+      register: extracted_java_dir
       become: yes
+
+    - name: fail if extracted java folder not found
+      fail:
+        msg: "Expected extracted folder '{{ extracted_java_path }}' not found"
+      when: not extracted_java_dir.stat.exists
 
     - name: rename extracted java folder to consistent name
       win_shell: |
-        $sourcePath = "{{ extracted_java_dirs.files[0].path }}"
         $targetName = Split-Path -Leaf "{{ java_home }}"
-        Rename-Item -Path $sourcePath -NewName $targetName
+        Rename-Item -Path "{{ extracted_java_path }}" -NewName $targetName
       args:
         creates: "{{ java_home }}"
       become: yes
-      when: extracted_java_dirs.matched | int > 0
 
   when: not java_exists.stat.exists
 
