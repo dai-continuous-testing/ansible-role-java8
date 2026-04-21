@@ -135,7 +135,6 @@
       become: yes
       when:
         - extracted_java_dirs.matched | int > 0
-        - extracted_java_dirs.files[0].path != java_home
 
   when: not java_exists.stat.exists or java_needs_replacement | default(false)
 
