@@ -1,7 +1,7 @@
-Experitest - Java8 ansible role
+Experitest - Java ansible role
 =========
 
-This role will install \ uninstall Java8 (or alternatives) in all platforms
+This role will install \ uninstall Java (or alternatives) in all platforms
 
 Requirements
 ------------
