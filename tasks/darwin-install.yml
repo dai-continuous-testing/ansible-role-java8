@@ -115,6 +115,31 @@
       become: yes
       when: unzip_java.rc != 0
 
+    - name: set extracted java folder path
+      set_fact:
+        extracted_java_path: "{{ java_installation_folder }}/jdk-{{ java_version | replace('_', '+') }}-jre"
+
+    - name: check extracted java folder exists
+      stat:
+        path: "{{ extracted_java_path }}"
+      register: extracted_java_dir
+      become: yes
+
+    - name: fail if extracted java folder not found
+      fail:
+        msg: "Expected extracted folder '{{ extracted_java_path }}' not found"
+      when: not extracted_java_dir.stat.exists
+
+    - name: rename extracted java folder to consistent name
+      command:
+        argv:
+          - mv
+          - "{{ extracted_java_path }}"
+          - "{{ java_home }}"
+      args:
+        creates: "{{ java_home }}"
+      become: yes
+
   when: not java_exists.stat.exists or java_needs_replacement | default(false)
 
 
