@@ -6,7 +6,7 @@ required_modifiable_fields:
   - custom_download_username
   - custom_download_password
 
-__java_version: "17.0.18_8"
+__java_version: "25.0.4_7"
 java_major_version: "{{ java_version.split('.')[0] }}"
 
 cdn_name: "devops-artifacts.experitest.com"
